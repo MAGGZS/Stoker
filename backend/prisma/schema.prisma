@@ -1,0 +1,218 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─────────────────────────────────────────────
+// ENUMS
+// ─────────────────────────────────────────────
+
+enum StockRole {
+  OWNER
+  GUEST
+}
+
+enum ItemStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum MovementType {
+  ENTRADA
+  SAIDA
+  AJUSTE
+}
+
+enum AuditAction {
+  USER_REGISTER
+  USER_LOGIN
+  STOCK_CREATE
+  STOCK_UPDATE
+  STOCK_DELETE
+  MEMBER_INVITE
+  MEMBER_REMOVE
+  MEMBER_UPDATE_ROLE
+  CATEGORY_CREATE
+  CATEGORY_UPDATE
+  CATEGORY_DELETE
+  ITEM_CREATE
+  ITEM_UPDATE
+  ITEM_DELETE
+  STOCK_IN
+  STOCK_OUT
+  STOCK_ADJUST
+  BATCH_RECONCILIATION
+}
+
+// ─────────────────────────────────────────────
+// MODELS
+// ─────────────────────────────────────────────
+
+model User {
+  id            String   @id @default(uuid())
+  name          String
+  email         String   @unique
+  password_hash String
+  avatar_url    String?
+  token_version Int      @default(0)
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
+
+  created_stocks    Stock[]       @relation("StockCreator")
+  stock_memberships StockMember[]
+  movements         Movement[]
+  audit_logs        AuditLog[]
+  invites_sent      StockInvite[] @relation("InviteSender")
+
+  @@map("users")
+}
+
+model Stock {
+  id                   String   @id @default(uuid())
+  name                 String
+  description          String?
+  share_code           String   @unique
+  created_by_id        String
+  allow_negative_stock Boolean  @default(false)
+  created_at           DateTime @default(now())
+  updated_at           DateTime @updatedAt
+
+  creator    User          @relation("StockCreator", fields: [created_by_id], references: [id], onDelete: Restrict)
+  members    StockMember[]
+  categories Category[]
+  items      Item[]
+  movements  Movement[]
+  invites    StockInvite[]
+  audit_logs AuditLog[]
+
+  @@map("stocks")
+}
+
+model StockMember {
+  id        String    @id @default(uuid())
+  stock_id  String
+  user_id   String
+  role      StockRole @default(GUEST)
+  joined_at DateTime  @default(now())
+
+  stock Stock @relation(fields: [stock_id], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@unique([stock_id, user_id])
+  @@index([user_id])
+  @@map("stock_members")
+}
+
+model StockInvite {
+  id            String    @id @default(uuid())
+  stock_id      String
+  email         String?
+  code          String    @unique
+  role          StockRole @default(GUEST)
+  invited_by_id String
+  expires_at    DateTime?
+  used_at       DateTime?
+  created_at    DateTime  @default(now())
+
+  stock      Stock @relation(fields: [stock_id], references: [id], onDelete: Cascade)
+  invited_by User  @relation("InviteSender", fields: [invited_by_id], references: [id], onDelete: Cascade)
+
+  @@index([stock_id])
+  @@map("stock_invites")
+}
+
+model Category {
+  id          String   @id @default(uuid())
+  stock_id    String
+  name        String
+  description String?
+  color       String?  @default("#DC2626")
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+
+  stock Stock  @relation(fields: [stock_id], references: [id], onDelete: Cascade)
+  items Item[]
+
+  @@unique([stock_id, name])
+  @@map("categories")
+}
+
+model Item {
+  id               String     @id @default(uuid())
+  stock_id         String
+  category_id      String?
+  name             String
+  sku              String
+  description      String?
+  unit             String     @default("UN")
+  current_quantity Decimal    @default(0) @db.Decimal(12, 3)
+  min_quantity     Decimal    @default(0) @db.Decimal(12, 3)
+  max_quantity     Decimal?   @db.Decimal(12, 3)
+  cost_price       Decimal    @default(0) @db.Decimal(12, 2)
+  sale_price       Decimal    @default(0) @db.Decimal(12, 2)
+  location         String?
+  status           ItemStatus @default(ACTIVE)
+  created_at       DateTime   @default(now())
+  updated_at       DateTime   @updatedAt
+
+  stock     Stock      @relation(fields: [stock_id], references: [id], onDelete: Cascade)
+  category  Category?  @relation(fields: [category_id], references: [id], onDelete: SetNull)
+  movements Movement[]
+
+  @@unique([stock_id, sku])
+  @@index([stock_id, status])
+  @@map("items")
+}
+
+model Movement {
+  id                String       @id @default(uuid())
+  stock_id          String
+  item_id           String
+  user_id           String
+  type              MovementType
+  reason            String
+  quantity          Decimal      @db.Decimal(12, 3)
+  previous_quantity Decimal      @db.Decimal(12, 3)
+  new_quantity      Decimal      @db.Decimal(12, 3)
+  unit_price        Decimal?     @db.Decimal(12, 2)
+  total_value       Decimal?     @db.Decimal(12, 2)
+  document_ref      String?
+  partner           String?
+  batch_number      String?
+  expiry_date       DateTime?
+  notes             String?
+  created_at        DateTime     @default(now())
+
+  stock Stock @relation(fields: [stock_id], references: [id], onDelete: Cascade)
+  item  Item  @relation(fields: [item_id], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([stock_id, type, created_at(sort: Desc)])
+  @@index([item_id, created_at(sort: Desc)])
+  @@map("movements")
+}
+
+model AuditLog {
+  id         String      @id @default(uuid())
+  user_id    String?
+  stock_id   String?
+  action     AuditAction
+  entity     String
+  entity_id  String?
+  details    Json?
+  ip_address String?
+  user_agent String?
+  created_at DateTime    @default(now())
+
+  user  User?  @relation(fields: [user_id], references: [id], onDelete: SetNull)
+  stock Stock? @relation(fields: [stock_id], references: [id], onDelete: Cascade)
+
+  @@index([stock_id, created_at(sort: Desc)])
+  @@index([user_id, created_at(sort: Desc)])
+  @@map("audit_logs")
+}
+

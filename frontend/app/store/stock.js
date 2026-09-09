@@ -1,0 +1,78 @@
+import { create } from 'zustand';
+import { api } from '../lib/api';
+import { getStoredActiveStockId, setStoredActiveStockId } from '../lib/session';
+
+export const useStockStore = create((set, get) => ({
+  stocks: [],
+  activeStockId: null,
+  activeStock: null,
+  activeRole: null,
+  isLoading: false,
+
+  fetchStocks: async () => {
+    set({ isLoading: true });
+    try {
+      const { data } = await api.get('/stocks');
+      const stocks = data || [];
+
+      let activeId = getStoredActiveStockId();
+      // Se não houver estoque ativo salvo ou o salvo não pertencer mais à lista, pega o primeiro
+      if (!activeId || !stocks.some((s) => s.id === activeId)) {
+        activeId = stocks[0]?.id || null;
+        setStoredActiveStockId(activeId);
+      }
+
+      const active = stocks.find((s) => s.id === activeId) || null;
+
+      set({
+        stocks,
+        activeStockId: activeId,
+        activeStock: active,
+        activeRole: active?.role || null,
+        isLoading: false,
+      });
+
+      return stocks;
+    } catch (err) {
+      set({ isLoading: false });
+      throw err;
+    }
+  },
+
+  switchStock: (stockId) => {
+    const { stocks } = get();
+    const active = stocks.find((s) => s.id === stockId);
+    if (active) {
+      setStoredActiveStockId(stockId);
+      set({
+        activeStockId: stockId,
+        activeStock: active,
+        activeRole: active.role,
+      });
+    }
+  },
+
+  createStock: async (payload) => {
+    const { data } = await api.post('/stocks', payload);
+    const { stocks } = get();
+    const updatedStocks = [...stocks, data];
+    setStoredActiveStockId(data.id);
+    set({
+      stocks: updatedStocks,
+      activeStockId: data.id,
+      activeStock: data,
+      activeRole: data.role,
+    });
+    return data;
+  },
+
+  joinStock: async (shareCode) => {
+    const { data } = await api.post('/stocks/join', { shareCode });
+    await get().fetchStocks();
+    if (data.stock?.id) {
+      get().switchStock(data.stock.id);
+    }
+    return data;
+  },
+}));
+
