@@ -13,6 +13,10 @@ export const updateStockSchema = z.object({
 });
 
 export const joinStockSchema = z.object({
-  shareCode: z.string().min(4, 'Código de compartilhamento inválido').toUpperCase(),
+  shareCode: z
+    .string()
+    .trim()
+    .length(6, 'O código de compartilhamento deve conter exatamente 6 caracteres')
+    .toUpperCase(),
 });
 

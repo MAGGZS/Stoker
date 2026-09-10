@@ -41,6 +41,18 @@ export class StockController {
     const stats = await stockService.getStockStats(stockId);
     res.status(200).json(stats);
   }
+
+  async getShareCode(req: Request, res: Response): Promise<void> {
+    const stockId = req.params.stockId;
+    const result = await stockService.getShareCode(stockId, req.user!.id);
+    res.status(200).json(result);
+  }
+
+  async refreshShareCode(req: Request, res: Response): Promise<void> {
+    const stockId = req.params.stockId;
+    const result = await stockService.refreshShareCode(stockId, req.user!.id);
+    res.status(200).json(result);
+  }
 }
 
 export const stockController = new StockController();

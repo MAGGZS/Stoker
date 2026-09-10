@@ -28,6 +28,8 @@ router.post('/join', validateBody(joinStockSchema), (req, res) => stockControlle
 router.use('/:stockId', requireStockAccess);
 
 router.get('/:stockId', (req, res) => stockController.getStockById(req, res));
+router.get('/:stockId/share-code', requireOwner, (req, res) => stockController.getShareCode(req, res));
+router.post('/:stockId/share-code/refresh', requireOwner, (req, res) => stockController.refreshShareCode(req, res));
 router.patch('/:stockId', requireOwner, validateBody(updateStockSchema), (req, res) => stockController.updateStock(req, res));
 router.delete('/:stockId', requireOwner, (req, res) => stockController.deleteStock(req, res));
 router.get('/:stockId/stats', (req, res) => stockController.getStockStats(req, res));

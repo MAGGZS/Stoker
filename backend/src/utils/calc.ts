@@ -27,16 +27,17 @@ export function calculateWeightedAverageCost(
 }
 
 /**
- * Gera um código curto e amigável para convite/compartilhamento de estoque.
- * Exemplo: STK-A49F2
+ * Gera um código de compartilhamento exclusivo de 6 caracteres alfanuméricos em caixa alta.
+ * Validade de 15 minutos.
+ * Exemplo: K8P2M5
  */
-export function generateShareCode(prefix = 'STK'): string {
+export function generateShareCode(): string {
   const chars = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ';
   let result = '';
-  const randomBytes = crypto.randomBytes(5);
-  for (let i = 0; i < 5; i++) {
+  const randomBytes = crypto.randomBytes(6);
+  for (let i = 0; i < 6; i++) {
     result += chars[randomBytes[i] % chars.length];
   }
-  return `${prefix}-${result}`;
+  return result;
 }
 

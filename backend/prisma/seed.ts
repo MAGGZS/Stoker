@@ -40,7 +40,8 @@ async function main() {
       data: {
         name: 'Almoxarifado Central',
         description: 'Estoque principal da matriz com insumos e produtos acabados',
-        share_code: 'STK-CENTRAL',
+        share_code: 'STK001',
+        share_code_expires_at: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000), // 1 ano para o seed
         created_by_id: owner.id,
         allow_negative_stock: false,
       },

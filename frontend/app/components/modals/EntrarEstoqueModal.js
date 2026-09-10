@@ -40,22 +40,23 @@ export function EntrarEstoqueModal({ isOpen, onClose, onSuccess }) {
       isOpen={isOpen}
       onClose={onClose}
       title="Entrar em um Estoque"
-      subtitle="Insira o código de compartilhamento fornecido pelo Dono"
+      subtitle="Insira o código temporário de 6 caracteres gerado pelo Proprietário"
       maxWidth="max-w-md"
     >
       <form onSubmit={handleSubmit} className="space-y-4">
         <Input
-          label="Código de Compartilhamento *"
-          placeholder="Ex: STK-A94F2"
+          label="Código de Acesso (6 caracteres) *"
+          placeholder="Ex: K8P2M5"
           value={shareCode}
-          onChange={(e) => setShareCode(e.target.value.toUpperCase())}
+          maxLength={6}
+          onChange={(e) => setShareCode(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ''))}
           required
           autoFocus
-          className="font-mono uppercase tracking-widest text-center text-lg"
+          className="font-mono uppercase tracking-[0.2em] text-center text-xl font-bold"
         />
 
         <p className="text-xs text-[rgba(255,255,255,0.55)] leading-relaxed">
-          Você será adicionado com permissão de <span className="text-white font-semibold">Convidado</span>, podendo realizar movimentações de entrada e saída.
+          Os códigos possuem validade de <span className="text-[#DC2626] font-semibold">15 minutos</span>. Você será adicionado com permissão de <span className="text-white font-semibold">Convidado</span> para consultar e movimentar o estoque.
         </p>
 
         <div className="flex items-center justify-end gap-2 pt-2 border-t border-[rgba(255,255,255,0.06)]">

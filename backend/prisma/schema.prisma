@@ -3,8 +3,9 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 // ─────────────────────────────────────────────
@@ -72,14 +73,15 @@ model User {
 }
 
 model Stock {
-  id                   String   @id @default(uuid())
-  name                 String
-  description          String?
-  share_code           String   @unique
-  created_by_id        String
-  allow_negative_stock Boolean  @default(false)
-  created_at           DateTime @default(now())
-  updated_at           DateTime @updatedAt
+  id                    String   @id @default(uuid())
+  name                  String
+  description           String?
+  share_code            String   @unique
+  share_code_expires_at DateTime @default(now())
+  created_by_id         String
+  allow_negative_stock  Boolean  @default(false)
+  created_at            DateTime @default(now())
+  updated_at            DateTime @updatedAt
 
   creator    User          @relation("StockCreator", fields: [created_by_id], references: [id], onDelete: Restrict)
   members    StockMember[]

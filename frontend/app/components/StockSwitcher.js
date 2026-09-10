@@ -95,7 +95,7 @@ export function StockSwitcher({ onOpenCreate, onOpenJoin, className = '' }) {
                       {stock.name}
                     </p>
                     <p className="text-[10px] text-[rgba(255,255,255,0.45)] mt-0.5">
-                      Código: <span className="font-mono text-white/80">{stock.shareCode}</span>
+                      Vínculo: <span className="text-white/80">{roleLabel(stock.role)}</span>
                     </p>
                   </div>
 

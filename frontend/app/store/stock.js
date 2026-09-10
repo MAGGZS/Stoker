@@ -74,5 +74,11 @@ export const useStockStore = create((set, get) => ({
     }
     return data;
   },
+
+  deleteStock: async (stockId) => {
+    const { data } = await api.delete(`/stocks/${stockId}`);
+    await get().fetchStocks();
+    return data;
+  },
 }));
 

@@ -88,12 +88,15 @@ export class StockService {
       attempts++;
     }
 
+    const expiresAt = new Date(Date.now() + 15 * 60 * 1000); // 15 minutos de validade
+
     const stock = await prisma.$transaction(async (tx) => {
       const created = await tx.stock.create({
         data: {
           name: data.name,
           description: data.description,
           share_code: shareCode,
+          share_code_expires_at: expiresAt,
           created_by_id: userId,
           allow_negative_stock: data.allowNegativeStock ?? false,
         },
@@ -164,9 +167,81 @@ export class StockService {
     return updated;
   }
 
+  async getShareCode(stockId: string, userId: string) {
+    const member = await prisma.stockMember.findUnique({
+      where: {
+        stock_id_user_id: { stock_id: stockId, user_id: userId },
+      },
+    });
+
+    if (!member || member.role !== StockRole.OWNER) {
+      throw new ForbiddenError('Apenas o proprietário pode visualizar o código de compartilhamento deste estoque');
+    }
+
+    const stock = await prisma.stock.findUnique({ where: { id: stockId } });
+    if (!stock) {
+      throw new NotFoundError('Estoque não encontrado');
+    }
+
+    const now = new Date();
+    // Se o código já expirou, renova automaticamente
+    if (now >= stock.share_code_expires_at) {
+      return this.refreshShareCode(stockId, userId);
+    }
+
+    const remainingSeconds = Math.max(
+      0,
+      Math.floor((stock.share_code_expires_at.getTime() - now.getTime()) / 1000)
+    );
+
+    return {
+      shareCode: stock.share_code,
+      expiresAt: stock.share_code_expires_at,
+      remainingSeconds,
+    };
+  }
+
+  async refreshShareCode(stockId: string, userId: string) {
+    const member = await prisma.stockMember.findUnique({
+      where: {
+        stock_id_user_id: { stock_id: stockId, user_id: userId },
+      },
+    });
+
+    if (!member || member.role !== StockRole.OWNER) {
+      throw new ForbiddenError('Apenas o proprietário pode gerar novo código de compartilhamento');
+    }
+
+    let shareCode = generateShareCode();
+    let attempts = 0;
+    while (attempts < 5) {
+      const exists = await prisma.stock.findUnique({ where: { share_code: shareCode } });
+      if (!exists) break;
+      shareCode = generateShareCode();
+      attempts++;
+    }
+
+    const expiresAt = new Date(Date.now() + 15 * 60 * 1000); // 15 minutos
+
+    const updated = await prisma.stock.update({
+      where: { id: stockId },
+      data: {
+        share_code: shareCode,
+        share_code_expires_at: expiresAt,
+      },
+    });
+
+    return {
+      shareCode: updated.share_code,
+      expiresAt: updated.share_code_expires_at,
+      remainingSeconds: 15 * 60,
+    };
+  }
+
   async joinStock(userId: string, shareCode: string) {
+    const cleanCode = shareCode.trim().toUpperCase();
     const stock = await prisma.stock.findUnique({
-      where: { share_code: shareCode.trim().toUpperCase() },
+      where: { share_code: cleanCode },
       include: {
         members: true,
       },
@@ -174,6 +249,11 @@ export class StockService {
 
     if (!stock) {
       throw new NotFoundError('Código de compartilhamento não encontrado ou inválido');
+    }
+
+    // Validação de expiração de 15 minutos
+    if (new Date() > stock.share_code_expires_at) {
+      throw new BadRequestError('Este código de acesso expirou. Solicite um novo código de 6 caracteres ao proprietário do estoque.');
     }
 
     const alreadyMember = stock.members.find((m) => m.user_id === userId);
@@ -205,7 +285,7 @@ export class StockService {
           action: AuditAction.MEMBER_INVITE,
           entity: 'StockMember',
           entity_id: mem.id,
-          details: { message: 'Usuário entrou no estoque via código de compartilhamento', role: StockRole.GUEST },
+          details: { message: 'Usuário entrou no estoque via código de compartilhamento de 15 minutos', role: StockRole.GUEST },
         },
       });
 
@@ -223,6 +303,16 @@ export class StockService {
   }
 
   async deleteStock(stockId: string, userId: string) {
+    const member = await prisma.stockMember.findUnique({
+      where: {
+        stock_id_user_id: { stock_id: stockId, user_id: userId },
+      },
+    });
+
+    if (!member || member.role !== StockRole.OWNER) {
+      throw new ForbiddenError('Apenas o proprietário pode excluir este estoque');
+    }
+
     await prisma.$transaction(async (tx) => {
       await tx.auditLog.create({
         data: {
@@ -231,7 +321,7 @@ export class StockService {
           action: AuditAction.STOCK_DELETE,
           entity: 'Stock',
           entity_id: stockId,
-          details: { message: 'Estoque excluído definitivamente pelo Dono' },
+          details: { message: 'Estoque excluído definitivamente pelo Proprietário' },
         },
       });
 

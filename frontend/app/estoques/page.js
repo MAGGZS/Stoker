@@ -18,10 +18,11 @@ import {
   Building,
   ArrowRightLeft,
   Trash2,
+  QrCode,
 } from 'lucide-react';
 
 export function EstoquesPage() {
-  const { activeStock, activeStockId, activeRole, stocks, switchStock } = useStockStore();
+  const { activeStock, activeStockId, activeRole, stocks, switchStock, deleteStock } = useStockStore();
   const owner = isOwner(activeRole);
   const { showToast } = useToast();
 
@@ -47,12 +48,25 @@ export function EstoquesPage() {
     loadMembers();
   }, [loadMembers]);
 
-  const handleCopyCode = () => {
-    if (!activeStock?.shareCode) return;
-    navigator.clipboard.writeText(activeStock.shareCode);
-    setCopied(true);
-    showToast('Código copiado!', 'success');
-    setTimeout(() => setCopied(false), 2500);
+  const handleDeleteStock = async () => {
+    if (!activeStockId || !owner) return;
+    const confirmName = prompt(
+      `ATENÇÃO: A exclusão de um estoque é permanente.\n\nPara confirmar a exclusão do estoque "${activeStock?.name}", digite o nome exato dele:`
+    );
+    if (!confirmName) return;
+
+    if (confirmName.trim().toLowerCase() !== activeStock?.name.trim().toLowerCase()) {
+      showToast('O nome digitado não confere. Exclusão cancelada.', 'warning');
+      return;
+    }
+
+    try {
+      await deleteStock(activeStockId);
+      showToast('Estoque excluído com sucesso!', 'success');
+    } catch (err) {
+      const msg = err.response?.data?.error?.message || 'Erro ao excluir estoque';
+      showToast(msg, 'danger');
+    }
   };
 
   const handleToggleRole = async (targetUserId, currentRole) => {
@@ -85,11 +99,11 @@ export function EstoquesPage() {
   return (
     <AppShell
       title="Gestão de Estoque e Membros"
-      subtitle="Controle de acesso com 2 níveis (Dono e Convidado) e compartilhamento"
+      subtitle="Controle de acesso por estoque: Proprietário e Convidado"
       onRefresh={loadMembers}
     >
       <div className="space-y-6">
-        {/* Card do Estoque Ativo & Código de Compartilhamento */}
+        {/* Card do Estoque Ativo & Ações */}
         <Card className="p-5 sm:p-6 bg-gradient-to-br from-[#141417] to-[#1C1C21] space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
@@ -111,24 +125,33 @@ export function EstoquesPage() {
               )}
             </div>
 
-            <div className="flex items-center gap-3">
-              <div className="bg-[#1E1E22] border border-[rgba(255,255,255,0.1)] rounded-[14px] px-4 py-2 text-center">
-                <span className="text-[10px] uppercase font-bold text-[rgba(255,255,255,0.4)] block">
-                  Código de Acesso
-                </span>
-                <span className="font-mono text-base font-extrabold text-[#DC2626]">
-                  {activeStock?.shareCode || '—'}
-                </span>
-              </div>
+            <div className="flex flex-wrap items-center gap-2">
+              {owner ? (
+                <>
+                  <Button
+                    variant="primary"
+                    size="md"
+                    onClick={() => setInviteModalOpen(true)}
+                    icon={<QrCode size={16} />}
+                  >
+                    Compartilhar Estoque
+                  </Button>
 
-              <Button
-                variant="secondary"
-                size="md"
-                onClick={handleCopyCode}
-                icon={copied ? <Check size={16} className="text-[#10B981]" /> : <Copy size={16} />}
-              >
-                {copied ? 'Copiado!' : 'Copiar'}
-              </Button>
+                  <Button
+                    variant="danger"
+                    size="md"
+                    onClick={handleDeleteStock}
+                    icon={<Trash2 size={16} />}
+                    title="Excluir este estoque definitivamente"
+                  >
+                    Excluir Estoque
+                  </Button>
+                </>
+              ) : (
+                <div className="p-3 rounded-[14px] bg-[#1E1E22] border border-[rgba(255,255,255,0.06)] text-xs text-[rgba(255,255,255,0.65)]">
+                  Você possui acesso como <strong className="text-white">Convidado</strong>. Apenas o Proprietário pode compartilhar ou excluir este estoque.
+                </div>
+              )}
             </div>
           </div>
         </Card>

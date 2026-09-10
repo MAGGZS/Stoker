@@ -28,7 +28,7 @@ export function canManageMembers(role) {
 }
 
 export function roleLabel(role) {
-  if (role === ROLES.OWNER) return 'Dono';
+  if (role === ROLES.OWNER) return 'Proprietário';
   if (role === ROLES.GUEST) return 'Convidado';
   return role || 'Sem papel';
 }

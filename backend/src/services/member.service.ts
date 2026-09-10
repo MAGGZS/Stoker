@@ -129,7 +129,7 @@ export class MemberService {
   }
 
   async createInvite(stockId: string, actorUserId: string, data: { email?: string | null; role?: StockRole }) {
-    const code = generateShareCode('INV');
+    const code = generateShareCode();
 
     const invite = await prisma.stockInvite.create({
       data: {

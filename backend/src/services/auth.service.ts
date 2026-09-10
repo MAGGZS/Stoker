@@ -32,6 +32,7 @@ export class AuthService {
           name: 'Estoque Principal',
           description: 'Estoque padrão inicial',
           share_code: generateShareCode(),
+          share_code_expires_at: new Date(Date.now() + 15 * 60 * 1000),
           created_by_id: user.id,
           allow_negative_stock: false,
         },
