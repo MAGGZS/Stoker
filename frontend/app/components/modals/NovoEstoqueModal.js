@@ -1,4 +1,5 @@
 'use client';
+
 import { useState } from 'react';
 import { Modal } from '../ui/Modal';
 import { Input } from '../ui/Input';
@@ -30,7 +31,6 @@ export function NovoEstoqueModal({ isOpen, onClose, onSuccess }) {
         allowNegativeStock: allowNegative,
       });
 
-      showToast(`Estoque "${created.name}" criado com você como Dono!`, 'success');
       showToast(`Estoque "${created.name}" criado com sucesso!`, 'success');
       onClose();
       if (onSuccess) onSuccess(created);
@@ -49,16 +49,12 @@ export function NovoEstoqueModal({ isOpen, onClose, onSuccess }) {
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title="Criar Novo Estoque"
-      subtitle="Você será configurado automaticamente como Dono"
       title="Criar novo estoque"
       subtitle="Defina o nome e as regras de operação para este estoque"
       maxWidth="max-w-md"
     >
       <form onSubmit={handleSubmit} className="space-y-4">
         <Input
-          label="Nome do Estoque *"
-          placeholder="Ex: Almoxarifado Filial Sul"
           label="Nome do estoque *"
           placeholder="Ex: Almoxarifado Central"
           value={name}
@@ -67,40 +63,31 @@ export function NovoEstoqueModal({ isOpen, onClose, onSuccess }) {
         />
 
         <Input
-          label="Descrição (Opcional)"
-          placeholder="Finalidade, localização ou departamento..."
           label="Descrição (opcional)"
           placeholder="Finalidade, localização ou setor..."
           value={description}
           onChange={(e) => setDescription(e.target.value)}
         />
 
-        <div className="p-3.5 rounded-[14px] bg-[#1E1E22] border border-[rgba(255,255,255,0.06)] flex items-start gap-3">
         <div className="p-3.5 rounded-xl bg-[#10121A] border border-[#232838] flex items-start gap-3">
           <input
             id="allowNegative"
             type="checkbox"
             checked={allowNegative}
             onChange={(e) => setAllowNegative(e.target.checked)}
-            className="mt-1 w-4 h-4 accent-[#DC2626] rounded cursor-pointer"
             className="mt-1 w-4 h-4 accent-rose-600 rounded cursor-pointer"
           />
-          <label htmlFor="allowNegative" className="text-xs text-[rgba(255,255,255,0.8)] cursor-pointer select-none">
-            <span className="font-semibold text-white block mb-0.5">Permitir saldo negativo</span>
-            Quando desmarcado (recomendado), o sistema bloqueia qualquer saída que exceda a quantidade disponível.
           <label htmlFor="allowNegative" className="text-xs text-zinc-300 cursor-pointer select-none">
             <span className="font-semibold text-zinc-100 block mb-0.5">Permitir saldo negativo</span>
             Quando desmarcado (recomendado), o sistema impede baixas que superem a quantidade em estoque.
           </label>
         </div>
 
-        <div className="flex items-center justify-end gap-2 pt-2 border-t border-[rgba(255,255,255,0.06)]">
         <div className="flex items-center justify-end gap-2 pt-2 border-t border-[#232838]">
           <Button variant="ghost" onClick={onClose} disabled={loading}>
             Cancelar
           </Button>
           <Button type="submit" variant="primary" loading={loading}>
-            Criar Estoque
             Criar estoque
           </Button>
         </div>
@@ -108,4 +95,3 @@ export function NovoEstoqueModal({ isOpen, onClose, onSuccess }) {
     </Modal>
   );
 }
-

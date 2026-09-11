@@ -37,28 +37,21 @@ export function ToastContainer() {
         return (
           <div
             key={toast.id}
-            className="pointer-events-auto flex items-start gap-3 p-3.5 rounded-[14px] bg-[#1E1E22] border border-[rgba(255,255,255,0.12)] shadow-[0_10px_30px_rgba(0,0,0,0.5)] anim-pop-in"
             className="pointer-events-auto flex items-start gap-3 p-3.5 rounded-xl bg-[#14161F] border border-[#232838] shadow-2xl shadow-black/60 anim-pop-in"
           >
             <div className="mt-0.5 shrink-0">
-              {isSuccess && <CheckCircle2 size={18} className="text-[#10B981]" />}
-              {isDanger && <AlertCircle size={18} className="text-[#EF4444]" />}
-              {isWarning && <AlertTriangle size={18} className="text-[#F59E0B]" />}
-              {!isSuccess && !isDanger && !isWarning && <Info size={18} className="text-[#3B82F6]" />}
               {isSuccess && <CheckCircle2 size={18} className="text-emerald-400" />}
               {isDanger && <AlertCircle size={18} className="text-rose-400" />}
               {isWarning && <AlertTriangle size={18} className="text-amber-400" />}
               {!isSuccess && !isDanger && !isWarning && <Info size={18} className="text-sky-400" />}
             </div>
 
-            <p className="text-xs sm:text-sm text-[rgba(255,255,255,0.92)] leading-relaxed flex-1">
             <p className="text-xs sm:text-sm text-zinc-200 leading-relaxed flex-1">
               {toast.message}
             </p>
 
             <button
               onClick={() => removeToast(toast.id)}
-              className="text-[rgba(255,255,255,0.4)] hover:text-white shrink-0 cursor-pointer"
               className="text-zinc-400 hover:text-zinc-100 p-0.5 rounded transition-colors shrink-0 cursor-pointer"
             >
               <X size={14} />

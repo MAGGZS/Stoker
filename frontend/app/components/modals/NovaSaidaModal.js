@@ -1,4 +1,5 @@
 'use client';
+
 import { useState, useEffect } from 'react';
 import { Modal } from '../ui/Modal';
 import { Input } from '../ui/Input';
@@ -35,7 +36,6 @@ export function NovaSaidaModal({ isOpen, onClose, onSuccess, initialItemId }) {
         })
         .catch(() => {});
     }
-  }, [isOpen, activeStockId]);
   }, [isOpen, activeStockId, selectedItemId]);
 
   useEffect(() => {
@@ -90,13 +90,11 @@ export function NovaSaidaModal({ isOpen, onClose, onSuccess, initialItemId }) {
 
       showToast(`Saída de ${numQty} ${selectedItem?.unit || 'un'} registrada com sucesso!`, 'success');
       if (data.isLowStockAlert) {
-        showToast(`Atenção: "${selectedItem?.name}" atingiu o estoque mínimo de segurança!`, 'warning', 6000);
         showToast(`Atenção: "${selectedItem?.name}" atingiu o estoque de segurança!`, 'warning');
       }
 
       onClose();
       if (onSuccess) onSuccess();
-      // Limpa campos
 
       setQuantity('');
       setPartner('');
@@ -116,13 +114,6 @@ export function NovaSaidaModal({ isOpen, onClose, onSuccess, initialItemId }) {
   }));
 
   const reasonOptions = [
-    { value: 'VENDA', label: 'Venda a Cliente' },
-    { value: 'CONSUMO_INTERNO', label: 'Consumo Interno / Uso Operacional' },
-    { value: 'PERDA_AVARIA', label: 'Perda / Quebra / Avaria' },
-    { value: 'DEVOLUCAO_FORNECEDOR', label: 'Devolução ao Fornecedor' },
-    { value: 'TRANSFERENCIA', label: 'Transferência para Outro Estoque' },
-    { value: 'AJUSTE_NEGATIVO', label: 'Ajuste Negativo de Inventário' },
-    { value: 'OUTRO', label: 'Outro' },
     { value: 'VENDA', label: 'Venda a cliente' },
     { value: 'CONSUMO_INTERNO', label: 'Consumo interno / Uso operacional' },
     { value: 'PERDA_AVARIA', label: 'Perda, quebra ou avaria' },
@@ -136,8 +127,6 @@ export function NovaSaidaModal({ isOpen, onClose, onSuccess, initialItemId }) {
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title="Registrar Saída de Estoque"
-      subtitle="Baixe quantidades com controle estrito de saldo disponível"
       title="Registrar saída de estoque"
       subtitle="Baixe mercadorias com validação de saldo e estoque de segurança"
       maxWidth="max-w-lg"
@@ -153,7 +142,6 @@ export function NovaSaidaModal({ isOpen, onClose, onSuccess, initialItemId }) {
 
         <div className="grid grid-cols-2 gap-3">
           <Input
-            label="Quantidade de Saída *"
             label="Quantidade a retirar *"
             type="number"
             step="any"
@@ -166,7 +154,6 @@ export function NovaSaidaModal({ isOpen, onClose, onSuccess, initialItemId }) {
           />
 
           <Input
-            label="Valor Unitário (R$)"
             label="Preço de venda (R$)"
             type="number"
             step="0.01"
@@ -177,12 +164,7 @@ export function NovaSaidaModal({ isOpen, onClose, onSuccess, initialItemId }) {
           />
         </div>
 
-        {/* Card informativo de Saldo e Validação */}
         {selectedItem && (
-          <div className="bg-[#1E1E22] border border-[rgba(255,255,255,0.06)] rounded-[14px] p-3 text-xs space-y-1.5">
-            <div className="flex justify-between text-[rgba(255,255,255,0.7)]">
-              <span>Saldo Atual Disponível:</span>
-              <span className="font-bold text-white">
           <div className="bg-[#10121A] border border-[#232838] rounded-xl p-3 text-xs space-y-1.5">
             <div className="flex justify-between text-zinc-400">
               <span>Saldo disponível agora:</span>
@@ -192,34 +174,24 @@ export function NovaSaidaModal({ isOpen, onClose, onSuccess, initialItemId }) {
             </div>
 
             {numQty > 0 && (
-              <div className="flex justify-between text-[rgba(255,255,255,0.7)] pt-1 border-t border-[rgba(255,255,255,0.06)]">
-                <span>Saldo Após a Saída:</span>
               <div className="flex justify-between text-zinc-400 pt-1 border-t border-[#232838]">
                 <span>Saldo após esta baixa:</span>
                 <span
-                  className={`font-bold ${
                   className={`font-semibold ${
                     newBalance < 0
-                      ? 'text-[#EF4444]'
                       ? 'text-rose-400'
                       : newBalance <= selectedItem.minQuantity
-                      ? 'text-[#F59E0B]'
-                      : 'text-white'
                       ? 'text-amber-400'
                       : 'text-zinc-100'
                   }`}
                 >
                   {newBalance.toFixed(2)} {selectedItem.unit}
-                  {newBalance <= selectedItem.minQuantity && newBalance >= 0 && ' (Alerta: Estoque Baixo)'}
                   {newBalance <= selectedItem.minQuantity && newBalance >= 0 && ' (Abaixo do estoque mínimo)'}
                 </span>
               </div>
             )}
 
             {hasInsufficientStock && (
-              <div className="flex items-center gap-1.5 text-[#EF4444] pt-1">
-                <AlertCircle size={14} />
-                <span>O estoque configurado não permite saldo negativo. Reduza a quantidade.</span>
               <div className="flex items-center gap-1.5 text-rose-400 pt-1">
                 <AlertCircle size={14} className="shrink-0" />
                 <span>Este estoque não permite saldo negativo. Reduza a quantidade.</span>
@@ -230,7 +202,6 @@ export function NovaSaidaModal({ isOpen, onClose, onSuccess, initialItemId }) {
 
         <div className="grid grid-cols-2 gap-3">
           <Select
-            label="Motivo da Saída"
             label="Motivo da saída"
             options={reasonOptions}
             value={reason}
@@ -238,8 +209,6 @@ export function NovaSaidaModal({ isOpen, onClose, onSuccess, initialItemId }) {
           />
 
           <Input
-            label="Destino / Cliente / Depto."
-            placeholder="Ex: Obra Alpha / Cliente João"
             label="Destino / Cliente / Obra"
             placeholder="Ex: Obra Centro / Cliente João"
             value={partner}
@@ -255,15 +224,12 @@ export function NovaSaidaModal({ isOpen, onClose, onSuccess, initialItemId }) {
         />
 
         <Input
-          label="Observações"
-          placeholder="Motivo detalhado ou autorização..."
           label="Observações (opcional)"
           placeholder="Motivo ou autorização da saída..."
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
         />
 
-        <div className="flex items-center justify-end gap-2 pt-2 border-t border-[rgba(255,255,255,0.06)]">
         <div className="flex items-center justify-end gap-2 pt-2 border-t border-[#232838]">
           <Button variant="ghost" onClick={onClose} disabled={loading}>
             Cancelar
@@ -274,7 +240,6 @@ export function NovaSaidaModal({ isOpen, onClose, onSuccess, initialItemId }) {
             loading={loading}
             disabled={hasInsufficientStock || numQty <= 0}
           >
-            Confirmar Saída
             Confirmar saída
           </Button>
         </div>
@@ -282,4 +247,3 @@ export function NovaSaidaModal({ isOpen, onClose, onSuccess, initialItemId }) {
     </Modal>
   );
 }
-
