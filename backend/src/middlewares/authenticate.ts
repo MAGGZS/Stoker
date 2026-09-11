@@ -16,10 +16,10 @@ export async function authenticate(req: Request, _res: Response, next: NextFunct
     throw new UnauthorizedError('Token inválido');
   }
 
-  // Verifica se o usuário ainda existe e se o token_version bate (para invalidar sessões pós-logout ou troca de senha)
+  // Verifica se o usuário ainda existe e se o token_version bate
   const user = await prisma.user.findUnique({
     where: { id: payload.sub },
-    select: { id: true, email: true, name: true, token_version: true },
+    select: { id: true, email: true, name: true, is_admin: true, token_version: true },
   });
 
   if (!user || user.token_version !== payload.tokenVersion) {
@@ -30,8 +30,8 @@ export async function authenticate(req: Request, _res: Response, next: NextFunct
     id: user.id,
     email: user.email,
     name: user.name,
+    isAdmin: user.is_admin,
   };
 
   next();
 }
-

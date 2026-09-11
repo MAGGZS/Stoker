@@ -8,6 +8,7 @@ import { logger } from './lib/logger';
 import { prisma } from './lib/prisma';
 import authRoutes from './routes/auth.routes';
 import stockRoutes from './routes/stock.routes';
+import logisticsRoutes from './routes/logistics.routes';
 import { errorHandler } from './middlewares/errorHandler';
 import { generalLimiter } from './middlewares/rateLimit';
 
@@ -75,6 +76,7 @@ app.get('/health/ready', async (_req, res) => {
 // Rotas da API
 app.use('/auth', authRoutes);
 app.use('/stocks', stockRoutes);
+app.use('/admin/logistica', logisticsRoutes);
 
 // Rota 404
 app.use((_req, res) => {

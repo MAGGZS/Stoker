@@ -47,6 +47,7 @@ enum AuditAction {
   STOCK_OUT
   STOCK_ADJUST
   BATCH_RECONCILIATION
+  INTER_STOCK_TRANSFER
 }
 
 // ─────────────────────────────────────────────
@@ -59,6 +60,7 @@ model User {
   email         String   @unique
   password_hash String
   avatar_url    String?
+  is_admin      Boolean  @default(false)
   token_version Int      @default(0)
   created_at    DateTime @default(now())
   updated_at    DateTime @updatedAt

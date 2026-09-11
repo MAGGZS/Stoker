@@ -39,6 +39,7 @@ export class AuthService {
       id: user.id,
       email: user.email,
       name: user.name,
+      isAdmin: user.is_admin,
       tokenVersion: user.token_version,
     });
 
@@ -54,6 +55,7 @@ export class AuthService {
         id: user.id,
         name: user.name,
         email: user.email,
+        isAdmin: user.is_admin,
       },
       defaultStockId: null,
       stocks: [],
@@ -96,6 +98,7 @@ export class AuthService {
       id: user.id,
       email: user.email,
       name: user.name,
+      isAdmin: user.is_admin,
       tokenVersion: user.token_version,
     });
 
@@ -120,6 +123,7 @@ export class AuthService {
         id: user.id,
         name: user.name,
         email: user.email,
+        isAdmin: user.is_admin,
       },
       stocks,
       defaultStockId: stocks[0]?.id || null,
@@ -143,6 +147,7 @@ export class AuthService {
       id: user.id,
       email: user.email,
       name: user.name,
+      isAdmin: user.is_admin,
       tokenVersion: user.token_version,
     });
 
@@ -157,6 +162,7 @@ export class AuthService {
         name: true,
         email: true,
         avatar_url: true,
+        is_admin: true,
         created_at: true,
         stock_memberships: {
           select: {
@@ -191,6 +197,7 @@ export class AuthService {
       name: user.name,
       email: user.email,
       avatarUrl: user.avatar_url,
+      isAdmin: user.is_admin,
       createdAt: user.created_at,
       stocks: user.stock_memberships.map((m) => ({
         id: m.stock.id,
@@ -223,7 +230,7 @@ export class AuthService {
       where: { id: userId },
       data: {
         password_hash: newHash,
-        token_version: { increment: 1 }, // invalida todas as sessões anteriores
+        token_version: { increment: 1 },
       },
     });
 

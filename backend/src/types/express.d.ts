@@ -4,6 +4,7 @@ export type AuthUser = {
   id: string;
   email: string;
   name: string;
+  isAdmin?: boolean;
 };
 
 declare global {
@@ -15,4 +16,3 @@ declare global {
     }
   }
 }
-

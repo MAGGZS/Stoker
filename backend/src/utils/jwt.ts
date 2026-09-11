@@ -6,16 +6,24 @@ export interface TokenPayload extends JwtPayload {
   sub: string;
   email: string;
   name: string;
+  isAdmin?: boolean;
   tokenVersion: number;
   type: 'access' | 'refresh';
 }
 
-export function generateAccessToken(payload: { id: string; email: string; name: string; tokenVersion: number }): string {
+export function generateAccessToken(payload: {
+  id: string;
+  email: string;
+  name: string;
+  isAdmin?: boolean;
+  tokenVersion: number;
+}): string {
   return jwt.sign(
     {
       sub: payload.id,
       email: payload.email,
       name: payload.name,
+      isAdmin: payload.isAdmin ?? false,
       tokenVersion: payload.tokenVersion,
       type: 'access',
     },
@@ -24,7 +32,12 @@ export function generateAccessToken(payload: { id: string; email: string; name: 
   );
 }
 
-export function generateRefreshToken(payload: { id: string; email: string; name: string; tokenVersion: number }): string {
+export function generateRefreshToken(payload: {
+  id: string;
+  email: string;
+  name: string;
+  tokenVersion: number;
+}): string {
   return jwt.sign(
     {
       sub: payload.id,

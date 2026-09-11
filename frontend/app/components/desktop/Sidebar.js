@@ -12,6 +12,8 @@ import {
   Boxes,
   LogOut,
   Warehouse,
+  Truck,
+  ShieldCheck,
 } from 'lucide-react';
 
 export function Sidebar({ onOpenCreateStock, onOpenJoinStock }) {
@@ -77,14 +79,40 @@ export function Sidebar({ onOpenCreateStock, onOpenJoinStock }) {
             </Link>
           );
         })}
+
+        {/* Seção Exclusiva de Administração Logística */}
+        {user?.isAdmin && (
+          <div className="pt-4 mt-3 border-t border-[#232838]">
+            <p className="text-[11px] font-bold uppercase tracking-wider text-amber-400/90 px-3 py-1.5 flex items-center gap-1.5">
+              <ShieldCheck size={13} className="text-amber-400" />
+              Gestão Central (ADM)
+            </p>
+            <Link
+              href="/admin/logistica"
+              className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-[background-color,color] mt-1 ${
+                pathname === '/admin/logistica'
+                  ? 'bg-amber-500/15 text-amber-300 font-semibold border border-amber-500/30 shadow-md shadow-amber-950/30'
+                  : 'text-zinc-400 hover:text-amber-300 hover:bg-[#14161F]'
+              }`}
+            >
+              <Truck size={18} strokeWidth={pathname === '/admin/logistica' ? 2.2 : 1.8} className="text-amber-400" />
+              <span>Painel de Logística</span>
+            </Link>
+          </div>
+        )}
       </nav>
 
       {/* Perfil de Usuário e Logout */}
       <div className="pt-3 border-t border-[#232838] mt-auto">
         <div className="flex items-center justify-between p-2.5 rounded-xl bg-[#14161F] border border-[#232838]">
           <div className="min-w-0 pr-2">
-            <p className="text-xs font-semibold text-zinc-100 truncate">
+            <p className="text-xs font-semibold text-zinc-100 truncate flex items-center gap-1.5">
               {user?.name || 'Usuário'}
+              {user?.isAdmin && (
+                <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-400 font-bold border border-amber-500/30">
+                  ADM
+                </span>
+              )}
             </p>
             <p className="text-[11px] text-zinc-400 truncate">
               {user?.email || ''}
@@ -104,4 +132,3 @@ export function Sidebar({ onOpenCreateStock, onOpenJoinStock }) {
     </aside>
   );
 }
-

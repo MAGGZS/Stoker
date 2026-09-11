@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useAuthStore } from '../../store/auth';
 import {
   LayoutDashboard,
   Package,
@@ -10,11 +11,13 @@ import {
   Warehouse,
   ArrowDownLeft,
   ArrowUpRight,
+  Truck,
   X,
 } from 'lucide-react';
 
 export function BottomNav({ onOpenInbound, onOpenOutbound }) {
   const pathname = usePathname();
+  const { user } = useAuthStore();
   const [actionSheetOpen, setActionSheetOpen] = useState(false);
 
   const navItems = [
@@ -22,7 +25,7 @@ export function BottomNav({ onOpenInbound, onOpenOutbound }) {
     { href: '/itens', label: 'Itens', icon: Package },
     { href: 'ACTION_CENTER', label: 'Lançar', icon: Plus, isAction: true },
     { href: '/movimentacoes', label: 'Histórico', icon: ArrowDownUp },
-    { href: '/estoques', label: 'Estoques', icon: Warehouse },
+    { href: user?.isAdmin ? '/admin/logistica' : '/estoques', label: user?.isAdmin ? 'Logística' : 'Estoques', icon: user?.isAdmin ? Truck : Warehouse },
   ];
 
   return (
@@ -123,10 +126,22 @@ export function BottomNav({ onOpenInbound, onOpenOutbound }) {
                 <span className="text-[11px] text-zinc-400 mt-0.5">Venda, consumo ou baixa</span>
               </button>
             </div>
+
+            {user?.isAdmin && (
+              <div className="pt-2 border-t border-[#232838]">
+                <Link
+                  href="/admin/logistica"
+                  onClick={() => setActionSheetOpen(false)}
+                  className="flex items-center justify-center gap-2.5 w-full p-3 rounded-xl bg-amber-500/15 text-amber-300 border border-amber-500/30 text-sm font-semibold"
+                >
+                  <Truck size={16} />
+                  <span>Acessar Cockpit de Logística (ADM)</span>
+                </Link>
+              </div>
+            )}
           </div>
         </div>
       )}
     </>
   );
 }
-
