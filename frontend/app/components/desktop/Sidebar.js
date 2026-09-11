@@ -1,8 +1,10 @@
 'use client';
+import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuthStore } from '../../store/auth';
 import { StockSwitcher } from '../StockSwitcher';
+import { FeedbackModal } from '../modals/FeedbackModal';
 import {
   LayoutDashboard,
   Package,
@@ -12,17 +14,18 @@ import {
   Boxes,
   LogOut,
   Warehouse,
-  Truck,
+  ShieldAlert,
   ShieldCheck,
   ArrowLeft,
+  MessageSquarePlus,
 } from 'lucide-react';
 
 export function Sidebar({ onOpenCreateStock, onOpenJoinStock }) {
   const pathname = usePathname();
   const { user, logout } = useAuthStore();
+  const [feedbackOpen, setFeedbackOpen] = useState(false);
 
   const navLinks = [
-    { href: '/estoques', label: 'Meus estoques', icon: Warehouse },
     { href: '/dashboard', label: 'Visão geral', icon: LayoutDashboard },
     { href: '/itens', label: 'Catálogo de itens', icon: Package },
     { href: '/movimentacoes', label: 'Movimentações', icon: ArrowDownUp },
@@ -31,127 +34,146 @@ export function Sidebar({ onOpenCreateStock, onOpenJoinStock }) {
   ];
 
   return (
-    <aside className="hidden lg:flex flex-col w-64 xl:w-72 bg-[#11131A] border-r border-[#232838] h-screen sticky top-0 shrink-0 z-30 p-4">
-      {/* Brand Logo */}
-      <div className="flex items-center gap-3 px-2 py-3 mb-2">
-        <div className="w-10 h-10 rounded-xl bg-[#14161F] border border-[#232838] text-rose-500 flex items-center justify-center shadow-lg shadow-black/40 shrink-0">
-          <Boxes size={22} strokeWidth={2.2} />
+    <>
+      <aside className="hidden lg:flex flex-col w-64 xl:w-72 bg-[#11131A] border-r border-[#232838] h-screen sticky top-0 shrink-0 z-30 p-4">
+        {/* Brand Logo */}
+        <div className="flex items-center gap-3 px-2 py-3 mb-2">
+          <div className="w-10 h-10 rounded-xl bg-[#14161F] border border-[#232838] text-rose-500 flex items-center justify-center shadow-lg shadow-black/40 shrink-0">
+            <Boxes size={22} strokeWidth={2.2} />
+          </div>
+          <div>
+            <span className="text-lg font-bold tracking-tight text-zinc-100 flex items-center gap-1">
+              Stoker
+              <span className="w-1.5 h-1.5 rounded-full bg-rose-500 inline-block" />
+            </span>
+            <p className="text-[11px] font-medium text-zinc-400">
+              Gestão de estoques
+            </p>
+          </div>
         </div>
-        <div>
-          <span className="text-lg font-bold tracking-tight text-zinc-100 flex items-center gap-1">
-            Stoker
-            <span className="w-1.5 h-1.5 rounded-full bg-rose-500 inline-block" />
-          </span>
-          <p className="text-[11px] font-medium text-zinc-400">
-            Gestão de estoques
+
+        {/* Botão de retorno para o Hub de Estoques */}
+        <Link
+          href="/estoques"
+          className="flex items-center justify-between px-3 py-2.5 mb-3 rounded-xl bg-[#14161F] hover:bg-[#1A1E29] border border-[#232838] hover:border-[#384158] text-zinc-300 hover:text-white transition-all group cursor-pointer shadow-sm active:scale-[0.98]"
+          title="Voltar para a seleção de estoques"
+        >
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="w-7 h-7 rounded-lg bg-[#0C0D11] border border-[#232838] flex items-center justify-center text-zinc-400 group-hover:text-rose-400 shrink-0">
+              <ArrowLeft size={14} />
+            </div>
+            <div className="text-left min-w-0">
+              <span className="text-xs font-semibold block text-zinc-200 group-hover:text-white truncate">
+                Meus estoques
+              </span>
+              <span className="text-[10px] text-zinc-500 block truncate">
+                Ver todos os estoques
+              </span>
+            </div>
+          </div>
+          <Warehouse size={15} className="text-zinc-500 group-hover:text-zinc-300 shrink-0 ml-1" />
+        </Link>
+
+        {/* Seletor de Estoque */}
+        <div className="mb-4">
+          <StockSwitcher
+            onOpenCreate={onOpenCreateStock}
+            onOpenJoin={onOpenJoinStock}
+          />
+        </div>
+
+        {/* Navegação Principal */}
+        <nav className="flex-1 space-y-1 overflow-y-auto pr-1">
+          <p className="text-[11px] font-medium text-zinc-400 px-3 py-2">
+            Navegação
           </p>
-        </div>
-      </div>
+          {navLinks.map((link) => {
+            const Icon = link.icon;
+            const isActive = pathname === link.href || pathname.startsWith(link.href);
 
-      {/* Botão de retorno para o Hub de Estoques */}
-      <Link
-        href="/estoques"
-        className="flex items-center justify-between px-3 py-2.5 mb-3 rounded-xl bg-[#14161F] hover:bg-[#1A1E29] border border-[#232838] hover:border-[#384158] text-zinc-300 hover:text-white transition-all group cursor-pointer shadow-sm active:scale-[0.98]"
-        title="Voltar para a seleção de estoques"
-      >
-        <div className="flex items-center gap-2.5 min-w-0">
-          <div className="w-7 h-7 rounded-lg bg-[#0C0D11] border border-[#232838] flex items-center justify-center text-zinc-400 group-hover:text-rose-400 shrink-0">
-            <ArrowLeft size={14} />
-          </div>
-          <div className="text-left min-w-0">
-            <span className="text-xs font-semibold block text-zinc-200 group-hover:text-white truncate">
-              Meus estoques
-            </span>
-            <span className="text-[10px] text-zinc-500 block truncate">
-              Ver todos os estoques
-            </span>
-          </div>
-        </div>
-        <Warehouse size={15} className="text-zinc-500 group-hover:text-zinc-300 shrink-0 ml-1" />
-      </Link>
+            return (
+              <Link
+                key={link.href}
+                href={link.href}
+                className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-[background-color,color] ${
+                  isActive
+                    ? 'bg-rose-600 text-white font-medium shadow-md shadow-rose-950/40'
+                    : 'text-zinc-400 hover:text-zinc-100 hover:bg-[#14161F]'
+                }`}
+              >
+                <Icon size={18} strokeWidth={isActive ? 2.2 : 1.8} />
+                <span>{link.label}</span>
+              </Link>
+            );
+          })}
 
-      {/* Seletor de Estoque */}
-      <div className="mb-4">
-        <StockSwitcher
-          onOpenCreate={onOpenCreateStock}
-          onOpenJoin={onOpenJoinStock}
-        />
-      </div>
+          {/* Seção Exclusiva de Administração da Plataforma (Criador) */}
+          {user?.isAdmin && (
+            <div className="pt-4 mt-3 border-t border-[#232838]">
+              <p className="text-[11px] font-bold uppercase tracking-wider text-amber-400/90 px-3 py-1.5 flex items-center gap-1.5">
+                <ShieldCheck size={13} className="text-amber-400" />
+                Administração
+              </p>
+              <Link
+                href="/admin"
+                className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-[background-color,color] mt-1 ${
+                  pathname.startsWith('/admin')
+                    ? 'bg-amber-500/15 text-amber-300 font-semibold border border-amber-500/30 shadow-md shadow-amber-950/30'
+                    : 'text-zinc-400 hover:text-amber-300 hover:bg-[#14161F]'
+                }`}
+              >
+                <ShieldAlert size={18} strokeWidth={pathname.startsWith('/admin') ? 2.2 : 1.8} className="text-amber-400" />
+                <span>Painel do Administrador</span>
+              </Link>
+            </div>
+          )}
 
-      {/* Navegação Principal */}
-      <nav className="flex-1 space-y-1 overflow-y-auto pr-1">
-        <p className="text-[11px] font-medium text-zinc-400 px-3 py-2">
-          Navegação
-        </p>
-        {navLinks.map((link) => {
-          const Icon = link.icon;
-          const isActive = pathname === link.href || (link.href !== '/estoques' && pathname.startsWith(link.href));
-
-          return (
-            <Link
-              key={link.href}
-              href={link.href}
-              className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-[background-color,color] ${
-                isActive
-                  ? 'bg-rose-600 text-white font-medium shadow-md shadow-rose-950/40'
-                  : 'text-zinc-400 hover:text-zinc-100 hover:bg-[#14161F]'
-              }`}
+          {/* Botão de Enviar Feedback */}
+          <div className="pt-3 mt-2 border-t border-[#232838]">
+            <button
+              type="button"
+              onClick={() => setFeedbackOpen(true)}
+              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-zinc-400 hover:text-zinc-100 hover:bg-[#14161F] transition-colors cursor-pointer"
             >
-              <Icon size={18} strokeWidth={isActive ? 2.2 : 1.8} />
-              <span>{link.label}</span>
-            </Link>
-          );
-        })}
+              <MessageSquarePlus size={18} className="text-rose-400" />
+              <span>Enviar feedback</span>
+            </button>
+          </div>
+        </nav>
 
-        {/* Seção Exclusiva de Administração Logística */}
-        {user?.isAdmin && (
-          <div className="pt-4 mt-3 border-t border-[#232838]">
-            <p className="text-[11px] font-bold uppercase tracking-wider text-amber-400/90 px-3 py-1.5 flex items-center gap-1.5">
-              <ShieldCheck size={13} className="text-amber-400" />
-              Gestão Central (ADM)
-            </p>
-            <Link
-              href="/admin/logistica"
-              className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-[background-color,color] mt-1 ${
-                pathname === '/admin/logistica'
-                  ? 'bg-amber-500/15 text-amber-300 font-semibold border border-amber-500/30 shadow-md shadow-amber-950/30'
-                  : 'text-zinc-400 hover:text-amber-300 hover:bg-[#14161F]'
-              }`}
+        {/* Perfil de Usuário e Logout */}
+        <div className="pt-3 border-t border-[#232838] mt-auto">
+          <div className="flex items-center justify-between p-2.5 rounded-xl bg-[#14161F] border border-[#232838]">
+            <div className="min-w-0 pr-2">
+              <p className="text-xs font-semibold text-zinc-100 truncate flex items-center gap-1.5">
+                {user?.name || 'Usuário'}
+                {user?.isAdmin && (
+                  <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-400 font-bold border border-amber-500/30">
+                    ADM
+                  </span>
+                )}
+              </p>
+              <p className="text-[11px] text-zinc-400 truncate">
+                {user?.email || ''}
+              </p>
+            </div>
+
+            <button
+              type="button"
+              onClick={logout}
+              title="Sair da conta"
+              className="w-8 h-8 rounded-lg bg-[#1A1E29] hover:bg-rose-500/20 text-zinc-400 hover:text-rose-300 flex items-center justify-center transition-colors cursor-pointer shrink-0 border border-[#262C3D]"
             >
-              <Truck size={18} strokeWidth={pathname === '/admin/logistica' ? 2.2 : 1.8} className="text-amber-400" />
-              <span>Painel de Logística</span>
-            </Link>
+              <LogOut size={15} />
+            </button>
           </div>
-        )}
-      </nav>
-
-      {/* Perfil de Usuário e Logout */}
-      <div className="pt-3 border-t border-[#232838] mt-auto">
-        <div className="flex items-center justify-between p-2.5 rounded-xl bg-[#14161F] border border-[#232838]">
-          <div className="min-w-0 pr-2">
-            <p className="text-xs font-semibold text-zinc-100 truncate flex items-center gap-1.5">
-              {user?.name || 'Usuário'}
-              {user?.isAdmin && (
-                <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-400 font-bold border border-amber-500/30">
-                  ADM
-                </span>
-              )}
-            </p>
-            <p className="text-[11px] text-zinc-400 truncate">
-              {user?.email || ''}
-            </p>
-          </div>
-
-          <button
-            type="button"
-            onClick={logout}
-            title="Sair da conta"
-            className="w-8 h-8 rounded-lg bg-[#1A1E29] hover:bg-rose-500/20 text-zinc-400 hover:text-rose-300 flex items-center justify-center transition-colors cursor-pointer shrink-0 border border-[#262C3D]"
-          >
-            <LogOut size={15} />
-          </button>
         </div>
-      </div>
-    </aside>
+      </aside>
+
+      <FeedbackModal
+        isOpen={feedbackOpen}
+        onClose={() => setFeedbackOpen(false)}
+      />
+    </>
   );
 }

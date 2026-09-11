@@ -70,6 +70,7 @@ model User {
   movements         Movement[]
   audit_logs        AuditLog[]
   invites_sent      StockInvite[] @relation("InviteSender")
+  feedbacks         Feedback[]
 
   @@map("users")
 }
@@ -220,3 +221,41 @@ model AuditLog {
   @@map("audit_logs")
 }
 
+
+
+// ─────────────────────────────────────────────
+// FEEDBACK
+// ─────────────────────────────────────────────
+
+enum FeedbackType {
+  SUGGESTION
+  BUG
+  COMPLIMENT
+  OTHER
+}
+
+enum FeedbackStatus {
+  PENDING
+  IN_REVIEW
+  RESOLVED
+  ARCHIVED
+}
+
+model Feedback {
+  id         String         @id @default(uuid())
+  user_id    String?
+  user_name  String?
+  user_email String?
+  type       FeedbackType   @default(SUGGESTION)
+  title      String
+  message    String
+  status     FeedbackStatus @default(PENDING)
+  rating     Int?
+  created_at DateTime       @default(now())
+  updated_at DateTime       @updatedAt
+
+  user User? @relation(fields: [user_id], references: [id], onDelete: SetNull)
+
+  @@index([status, created_at(sort: Desc)])
+  @@map("feedbacks")
+}

@@ -1,6 +1,4 @@
 'use client';
-import { useState, createContext, useContext } from 'react';
-import { useRouter } from 'next/navigation';
 import { useState, createContext, useContext, useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAuthStore } from '../store/auth';
@@ -23,14 +21,13 @@ export function useAppShell() {
 
 export function AppShell({ children, title, subtitle, onRefresh }) {
   const { user, isLoading } = useAuthStore();
-  const { activeStock, activeRole, fetchStocks } = useStockStore();
   const { activeStock, activeStockId, activeRole, fetchStocks } = useStockStore();
   const router = useRouter();
   const pathname = usePathname();
 
-  // Se não houver estoque ativo e não for a tela de logística do ADM, redireciona para /estoques
+  // Se não houver estoque ativo e não for a tela de administração do criador, redireciona para /estoques
   useEffect(() => {
-    if (!isLoading && user && !activeStockId && pathname !== '/admin/logistica') {
+    if (!isLoading && user && !activeStockId && !pathname.startsWith('/admin')) {
       router.replace('/estoques');
     }
   }, [isLoading, user, activeStockId, pathname, router]);
@@ -75,8 +72,8 @@ export function AppShell({ children, title, subtitle, onRefresh }) {
     return null;
   }
 
-  // Se não há estoque ativo e não é rota de logística global do ADM, exibe loading enquanto redireciona
-  if (!activeStockId && pathname !== '/admin/logistica') {
+  // Se não há estoque ativo e não é rota de administração global do criador, exibe loading enquanto redireciona
+  if (!activeStockId && !pathname.startsWith('/admin')) {
     return (
       <div className="min-h-screen bg-[#0C0D11] flex items-center justify-center">
         <span className="w-8 h-8 border-2 border-rose-500 border-t-transparent rounded-full animate-spin" />
@@ -169,4 +166,3 @@ export function AppShell({ children, title, subtitle, onRefresh }) {
     </AppShellContext.Provider>
   );
 }
-

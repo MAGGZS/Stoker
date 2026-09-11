@@ -5,6 +5,7 @@ import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { Badge } from '../components/ui/Badge';
 import { ConvidarMembroModal } from '../components/modals/ConvidarMembroModal';
+import { FeedbackModal } from '../components/modals/FeedbackModal';
 import { NovoEstoqueModal } from '../components/modals/NovoEstoqueModal';
 import { EntrarEstoqueModal } from '../components/modals/EntrarEstoqueModal';
 import { useToast } from '../components/ui/Toast';
@@ -18,6 +19,8 @@ import {
   KeyRound,
   Users,
   ShieldCheck,
+  ShieldAlert,
+  MessageSquarePlus,
   Copy,
   Check,
   Trash2,
@@ -51,6 +54,7 @@ export default function EstoquesPage() {
   const [filterTab, setFilterTab] = useState('ALL'); // 'ALL' | 'MINE' | 'SHARED'
   const [copiedCodeId, setCopiedCodeId] = useState(null);
   const [showMembersSection, setShowMembersSection] = useState(false);
+  const [feedbackOpen, setFeedbackOpen] = useState(false);
 
   // Recarrega lista de estoques
   const refreshAll = useCallback(async () => {
@@ -209,14 +213,23 @@ export default function EstoquesPage() {
 
           {/* User actions */}
           <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => setFeedbackOpen(true)}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#14161F] hover:bg-[#1A1E29] border border-[#232838] hover:border-[#384158] text-zinc-300 hover:text-white text-xs font-semibold cursor-pointer transition-colors"
+            >
+              <MessageSquarePlus size={14} className="text-rose-400" />
+              <span className="hidden sm:inline">Feedback</span>
+            </button>
+
             {user?.isAdmin && (
               <button
                 type="button"
-                onClick={() => router.push('/admin/logistica')}
-                className="hidden sm:inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/30 text-amber-300 text-xs font-semibold cursor-pointer transition-colors"
+                onClick={() => router.push('/admin')}
+                className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/30 text-amber-300 text-xs font-semibold cursor-pointer transition-colors"
               >
-                <Truck size={15} />
-                <span>Painel de Logística</span>
+                <ShieldAlert size={14} />
+                <span>Painel ADM</span>
               </button>
             )}
 
@@ -616,6 +629,11 @@ export default function EstoquesPage() {
         onSuccess={() => {
           refreshAll();
         }}
+      />
+
+      <FeedbackModal
+        isOpen={feedbackOpen}
+        onClose={() => setFeedbackOpen(false)}
       />
 
       <ConvidarMembroModal

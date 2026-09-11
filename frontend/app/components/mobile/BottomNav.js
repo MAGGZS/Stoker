@@ -11,7 +11,7 @@ import {
   Warehouse,
   ArrowDownLeft,
   ArrowUpRight,
-  Truck,
+  ShieldCheck,
   X,
 } from 'lucide-react';
 
@@ -25,7 +25,7 @@ export function BottomNav({ onOpenInbound, onOpenOutbound }) {
     { href: '/itens', label: 'Itens', icon: Package },
     { href: 'ACTION_CENTER', label: 'Lançar', icon: Plus, isAction: true },
     { href: '/movimentacoes', label: 'Histórico', icon: ArrowDownUp },
-    { href: user?.isAdmin ? '/admin/logistica' : '/estoques', label: user?.isAdmin ? 'Logística' : 'Estoques', icon: user?.isAdmin ? Truck : Warehouse },
+    { href: user?.isAdmin ? '/admin' : '/estoques', label: user?.isAdmin ? 'Admin' : 'Estoques', icon: user?.isAdmin ? ShieldCheck : Warehouse },
   ];
 
   return (
@@ -130,12 +130,12 @@ export function BottomNav({ onOpenInbound, onOpenOutbound }) {
             {user?.isAdmin && (
               <div className="pt-2 border-t border-[#232838]">
                 <Link
-                  href="/admin/logistica"
+                  href="/admin"
                   onClick={() => setActionSheetOpen(false)}
                   className="flex items-center justify-center gap-2.5 w-full p-3 rounded-xl bg-amber-500/15 text-amber-300 border border-amber-500/30 text-sm font-semibold"
                 >
-                  <Truck size={16} />
-                  <span>Acessar Cockpit de Logística (ADM)</span>
+                  <ShieldCheck size={16} />
+                  <span>Acessar Painel do Administrador (ADM)</span>
                 </Link>
               </div>
             )}
