@@ -36,6 +36,7 @@ export function NovaEntradaModal({ isOpen, onClose, onSuccess, initialItemId }) 
         .catch(() => {});
     }
   }, [isOpen, activeStockId]);
+  }, [isOpen, activeStockId, selectedItemId]);
 
   useEffect(() => {
     if (initialItemId) {
@@ -99,6 +100,7 @@ export function NovaEntradaModal({ isOpen, onClose, onSuccess, initialItemId }) 
       onClose();
       if (onSuccess) onSuccess();
       // Limpa campos
+
       setQuantity('');
       setPartner('');
       setDocumentRef('');
@@ -124,6 +126,12 @@ export function NovaEntradaModal({ isOpen, onClose, onSuccess, initialItemId }) 
     { value: 'BONIFICACAO', label: 'Bonificação / Doação' },
     { value: 'AJUSTE_POSITIVO', label: 'Ajuste / Sobra de Inventário' },
     { value: 'OUTRO', label: 'Outro' },
+    { value: 'COMPRA', label: 'Compra de fornecedor' },
+    { value: 'DEVOLUCAO_CLIENTE', label: 'Devolução de cliente' },
+    { value: 'TRANSFERENCIA', label: 'Transferência entre estoques' },
+    { value: 'BONIFICACAO', label: 'Bonificação ou brinde' },
+    { value: 'AJUSTE_POSITIVO', label: 'Sobra de conferência' },
+    { value: 'OUTRO', label: 'Outro motivo' },
   ];
 
   return (
@@ -132,6 +140,8 @@ export function NovaEntradaModal({ isOpen, onClose, onSuccess, initialItemId }) 
       onClose={onClose}
       title="Registrar Entrada de Estoque"
       subtitle="Adicione mercadorias e atualize o custo médio automaticamente"
+      title="Registrar entrada de mercadoria"
+      subtitle="Adicione itens ao saldo com recálculo automático de custo médio"
       maxWidth="max-w-lg"
     >
       <form onSubmit={handleSubmit} className="space-y-4">
@@ -157,6 +167,7 @@ export function NovaEntradaModal({ isOpen, onClose, onSuccess, initialItemId }) 
 
           <Input
             label="Custo Unitário (R$) *"
+            label="Custo unitário (R$) *"
             type="number"
             step="0.01"
             min="0"
@@ -173,10 +184,17 @@ export function NovaEntradaModal({ isOpen, onClose, onSuccess, initialItemId }) 
             <div className="flex justify-between text-[rgba(255,255,255,0.7)]">
               <span>Valor Total da Entrada:</span>
               <span className="font-bold text-white">R$ {totalCost}</span>
+          <div className="bg-[#10121A] border border-[#232838] rounded-xl p-3 text-xs space-y-1.5">
+            <div className="flex justify-between text-zinc-400">
+              <span>Valor total da compra:</span>
+              <span className="font-semibold text-zinc-100">R$ {totalCost}</span>
             </div>
             <div className="flex justify-between text-[rgba(255,255,255,0.7)]">
               <span>Saldo Atual ➔ Novo Saldo:</span>
               <span className="font-semibold text-[#10B981]">
+            <div className="flex justify-between text-zinc-400">
+              <span>Saldo projetado:</span>
+              <span className="font-semibold text-emerald-400">
                 {selectedItem.currentQuantity} ➔ {(selectedItem.currentQuantity + numQty).toFixed(2)} {selectedItem.unit}
               </span>
             </div>
@@ -184,6 +202,9 @@ export function NovaEntradaModal({ isOpen, onClose, onSuccess, initialItemId }) 
               <div className="flex justify-between text-[rgba(255,255,255,0.7)] pt-1 border-t border-[rgba(255,255,255,0.06)]">
                 <span>Novo Custo Médio Ponderado (CMP):</span>
                 <span className="font-bold text-[#F87171]">R$ {estimatedNewCmp.toFixed(2)}</span>
+              <div className="flex justify-between text-zinc-400 pt-1 border-t border-[#232838]">
+                <span>Novo custo médio (CMP):</span>
+                <span className="font-semibold text-rose-400">R$ {estimatedNewCmp.toFixed(2)}</span>
               </div>
             )}
           </div>
@@ -192,6 +213,7 @@ export function NovaEntradaModal({ isOpen, onClose, onSuccess, initialItemId }) 
         <div className="grid grid-cols-2 gap-3">
           <Select
             label="Motivo da Entrada"
+            label="Motivo da entrada"
             options={reasonOptions}
             value={reason}
             onChange={(e) => setReason(e.target.value)}
@@ -208,6 +230,7 @@ export function NovaEntradaModal({ isOpen, onClose, onSuccess, initialItemId }) 
         <div className="grid grid-cols-2 gap-3">
           <Input
             label="Nota Fiscal / Doc."
+            label="Nota Fiscal / Pedido"
             placeholder="Ex: NF-5842"
             value={documentRef}
             onChange={(e) => setDocumentRef(e.target.value)}
@@ -215,6 +238,7 @@ export function NovaEntradaModal({ isOpen, onClose, onSuccess, initialItemId }) 
 
           <Input
             label="Número do Lote"
+            label="Número do lote"
             placeholder="Ex: LOT-2026-A"
             value={batchNumber}
             onChange={(e) => setBatchNumber(e.target.value)}
@@ -224,16 +248,20 @@ export function NovaEntradaModal({ isOpen, onClose, onSuccess, initialItemId }) 
         <Input
           label="Observações Adicionais"
           placeholder="Detalhes ou condições da entrega..."
+          label="Observações (opcional)"
+          placeholder="Condições do lote, detalhes da entrega..."
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
         />
 
         <div className="flex items-center justify-end gap-2 pt-2 border-t border-[rgba(255,255,255,0.06)]">
+        <div className="flex items-center justify-end gap-2 pt-2 border-t border-[#232838]">
           <Button variant="ghost" onClick={onClose} disabled={loading}>
             Cancelar
           </Button>
           <Button type="submit" variant="primary" loading={loading}>
             Confirmar Entrada
+            Salvar entrada
           </Button>
         </div>
       </form>

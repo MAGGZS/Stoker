@@ -6,31 +6,51 @@
   --color-card: #141417;
   --color-chip: #1E1E22;
   --color-hover: #26262B;
+  --color-page: #0C0D11;
+  --color-card: #14161F;
+  --color-card-muted: #11131A;
+  --color-chip: #1A1E29;
+  --color-hover: #222736;
   --color-line: rgba(255, 255, 255, 0.08);
   --color-line-focus: rgba(220, 38, 38, 0.5);
+  --color-line-strong: rgba(255, 255, 255, 0.14);
+  --color-line-focus: rgba(225, 29, 72, 0.55);
 
   /* Identidade Visual Stoker: Vermelho Rubro */
   --color-accent: #DC2626;
   --color-accent-hover: #EF4444;
   --color-accent-soft: rgba(220, 38, 38, 0.14);
   --color-accent-ink: #F87171;
+  /* Identidade Visual Stoker: Carmim de Precisão Industrial */
+  --color-accent: #E11D48;
+  --color-accent-hover: #F43F5E;
+  --color-accent-soft: rgba(225, 29, 72, 0.14);
+  --color-accent-ink: #FB7185;
   --color-onaccent: #FFFFFF;
 
   --color-ink: rgba(255, 255, 255, 0.96);
   --color-mute: rgba(255, 255, 255, 0.65);
   --color-faint: rgba(255, 255, 255, 0.40);
+  --color-ink: #F4F4F5;
+  --color-mute: rgba(244, 244, 245, 0.65);
+  --color-faint: rgba(244, 244, 245, 0.40);
 
   /* Operações de Estoque */
   --color-success: #10B981;
   --color-success-soft: rgba(16, 185, 129, 0.14);
   --color-danger: #EF4444;
   --color-danger-soft: rgba(239, 68, 68, 0.14);
+  --color-danger: #F43F5E;
+  --color-danger-soft: rgba(244, 63, 94, 0.14);
   --color-warning: #F59E0B;
   --color-warning-soft: rgba(245, 158, 11, 0.14);
   --color-info: #3B82F6;
+  --color-info: #38BDF8;
 
   --radius-card: 12px;
   --radius-control: 14px;
+  --radius-card: 14px;
+  --radius-control: 12px;
   --radius-pill: 999px;
 }
 
@@ -40,31 +60,53 @@
   --backdrop: rgba(0, 0, 0, 0.75);
   --scroll-thumb: rgba(255, 255, 255, 0.12);
   --selection: rgba(220, 38, 38, 0.35);
+  --hero-surface: linear-gradient(160deg, #181B24 0%, #11131A 100%);
+  --card-ring: 0 0 0 1px rgba(255, 255, 255, 0.07);
+  --backdrop: rgba(6, 7, 10, 0.78);
+  --scroll-thumb: rgba(255, 255, 255, 0.14);
+  --selection: rgba(225, 29, 72, 0.35);
   --selection-ink: #FFFFFF;
   color-scheme: dark;
 }
 
 html[data-theme='light'] {
   --color-page: #F5F6F8;
+  --color-page: #F8FAFC;
   --color-card: #FFFFFF;
   --color-chip: #EAEBED;
   --color-hover: #DFE1E5;
   --color-line: rgba(16, 19, 23, 0.09);
   --color-line-focus: rgba(220, 38, 38, 0.6);
+  --color-card-muted: #F1F5F9;
+  --color-chip: #E2E8F0;
+  --color-hover: #CBD5E1;
+  --color-line: rgba(15, 23, 42, 0.08);
+  --color-line-strong: rgba(15, 23, 42, 0.15);
+  --color-line-focus: rgba(225, 29, 72, 0.6);
 
   --color-accent: #DC2626;
   --color-accent-hover: #B91C1C;
   --color-accent-soft: rgba(220, 38, 38, 0.12);
   --color-accent-ink: #991B1B;
+  --color-accent: #E11D48;
+  --color-accent-hover: #BE123C;
+  --color-accent-soft: rgba(225, 29, 72, 0.10);
+  --color-accent-ink: #9F1239;
   --color-onaccent: #FFFFFF;
 
   --color-ink: rgba(17, 24, 39, 0.94);
   --color-mute: rgba(17, 24, 39, 0.62);
   --color-faint: rgba(17, 24, 39, 0.45);
+  --color-ink: #0F172A;
+  --color-mute: rgba(15, 23, 42, 0.65);
+  --color-faint: rgba(15, 23, 42, 0.45);
 
   --card-ring: 0 0 0 1px rgba(0, 0, 0, 0.08);
   --backdrop: rgba(0, 0, 0, 0.45);
   --scroll-thumb: rgba(0, 0, 0, 0.15);
+  --card-ring: 0 0 0 1px rgba(15, 23, 42, 0.08);
+  --backdrop: rgba(15, 23, 42, 0.45);
+  --scroll-thumb: rgba(15, 23, 42, 0.18);
   color-scheme: light;
 }
 
@@ -88,10 +130,12 @@ body {
 }
 
 /* Animações fluidas inspiradas no Viston */
+/* Transições táteis e orgânicas (Emil Kowalski guidelines) */
 @keyframes popIn {
   from {
     opacity: 0;
     transform: scale(0.96);
+    transform: scale(0.98);
   }
   to {
     opacity: 1;
@@ -103,6 +147,7 @@ body {
   from {
     opacity: 0;
     transform: translateX(18px);
+    transform: translateX(12px);
   }
   to {
     opacity: 1;
@@ -114,6 +159,7 @@ body {
   from {
     opacity: 0;
     transform: translateX(-18px);
+    transform: translateX(-12px);
   }
   to {
     opacity: 1;
@@ -123,14 +169,17 @@ body {
 
 .anim-pop-in {
   animation: popIn 220ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: popIn 180ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 .anim-slide-from-right {
   animation: slideFromRight 260ms cubic-bezier(0.16, 1, 0.3, 1) backwards;
+  animation: slideFromRight 200ms cubic-bezier(0.16, 1, 0.3, 1) backwards;
 }
 
 .anim-slide-from-left {
   animation: slideFromLeft 260ms cubic-bezier(0.16, 1, 0.3, 1) backwards;
+  animation: slideFromLeft 200ms cubic-bezier(0.16, 1, 0.3, 1) backwards;
 }
 
 /* Scrollbar estilizada */

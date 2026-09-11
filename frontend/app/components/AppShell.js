@@ -53,8 +53,8 @@ export function AppShell({ children, title, subtitle, onRefresh }) {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[#0B0B0C] flex items-center justify-center">
-        <span className="w-8 h-8 border-2 border-[#DC2626] border-t-transparent rounded-full animate-spin" />
+      <div className="min-h-screen bg-[#0C0D11] flex items-center justify-center">
+        <span className="w-8 h-8 border-2 border-rose-500 border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -76,7 +76,7 @@ export function AppShell({ children, title, subtitle, onRefresh }) {
         activeRole,
       }}
     >
-      <div className="min-h-screen bg-[#0B0B0C] text-[rgba(255,255,255,0.95)] flex">
+      <div className="min-h-screen bg-[#0C0D11] text-zinc-100 flex">
         {/* Sidebar Desktop */}
         <Sidebar
           onOpenCreateStock={openNewStock}
@@ -86,7 +86,7 @@ export function AppShell({ children, title, subtitle, onRefresh }) {
         {/* Área de Conteúdo Principal */}
         <div className="flex-1 flex flex-col min-w-0 pb-20 lg:pb-8">
           {/* Top Bar Mobile exclusiva */}
-          <div className="lg:hidden sticky top-0 z-30 bg-[#0B0B0C]/90 backdrop-blur-md border-b border-[rgba(255,255,255,0.06)] px-4 py-3 pt-[calc(12px+env(safe-area-inset-top))]">
+          <div className="lg:hidden sticky top-0 z-30 bg-[#0C0D11]/90 backdrop-blur-md border-b border-[#232838] px-4 py-3 pt-[calc(12px+env(safe-area-inset-top))]">
             <StockSwitcher
               onOpenCreate={openNewStock}
               onOpenJoin={openJoinStock}

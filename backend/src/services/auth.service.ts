@@ -4,6 +4,7 @@ import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from '.
 import { ConflictError, UnauthorizedError, BadRequestError } from '../utils/errors';
 import { generateShareCode } from '../utils/calc';
 import { StockRole, AuditAction } from '@prisma/client';
+import { AuditAction } from '@prisma/client';
 
 export class AuthService {
   async register(data: { name: string; email: string; password: string }) {
@@ -26,6 +27,14 @@ export class AuthService {
           password_hash: passwordHash,
         },
       });
+    // Cria apenas a conta do usuário (sem criar estoque automático inicial)
+    const user = await prisma.user.create({
+      data: {
+        name: data.name,
+        email: data.email,
+        password_hash: passwordHash,
+      },
+    });
 
       const defaultStock = await tx.stock.create({
         data: {
@@ -68,6 +77,14 @@ export class AuthService {
       });
 
       return { user, defaultStock };
+    await prisma.auditLog.create({
+      data: {
+        user_id: user.id,
+        action: AuditAction.USER_REGISTER,
+        entity: 'User',
+        entity_id: user.id,
+        details: { message: 'Conta criada' },
+      },
     });
 
     const accessToken = generateAccessToken({
@@ -75,6 +92,10 @@ export class AuthService {
       email: result.user.email,
       name: result.user.name,
       tokenVersion: result.user.token_version,
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      tokenVersion: user.token_version,
     });
 
     const refreshToken = generateRefreshToken({
@@ -82,6 +103,10 @@ export class AuthService {
       email: result.user.email,
       name: result.user.name,
       tokenVersion: result.user.token_version,
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      tokenVersion: user.token_version,
     });
 
     return {
@@ -89,8 +114,13 @@ export class AuthService {
         id: result.user.id,
         name: result.user.name,
         email: result.user.email,
+        id: user.id,
+        name: user.name,
+        email: user.email,
       },
       defaultStockId: result.defaultStock.id,
+      defaultStockId: null,
+      stocks: [],
       accessToken,
       refreshToken,
     };
@@ -104,6 +134,13 @@ export class AuthService {
           include: {
             stock: {
               select: { id: true, name: true, share_code: true },
+              select: {
+                id: true,
+                name: true,
+                description: true,
+                share_code: true,
+                created_by_id: true,
+              },
             },
           },
           orderBy: { joined_at: 'asc' },
@@ -137,8 +174,10 @@ export class AuthService {
     const stocks = user.stock_memberships.map((m) => ({
       id: m.stock.id,
       name: m.stock.name,
+      description: m.stock.description,
       shareCode: m.stock.share_code,
       role: m.role,
+      isCreator: m.stock.created_by_id === user.id,
     }));
 
     return {

@@ -30,6 +30,8 @@ export class StockService {
       shareCode: m.stock.share_code,
       allowNegativeStock: m.stock.allow_negative_stock,
       role: m.role,
+      isCreator: m.stock.created_by_id === userId,
+      createdAt: m.stock.created_at,
       joinedAt: m.joined_at,
       counts: {
         items: m.stock._count.items,

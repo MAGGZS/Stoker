@@ -75,6 +75,15 @@ export const useStockStore = create((set, get) => ({
     return data;
   },
 
+  clearActiveStock: () => {
+    setStoredActiveStockId(null);
+    set({
+      activeStockId: null,
+      activeStock: null,
+      activeRole: null,
+    });
+  },
+
   deleteStock: async (stockId) => {
     const { data } = await api.delete(`/stocks/${stockId}`);
     await get().fetchStocks();
