@@ -2,8 +2,6 @@ import { prisma } from '../lib/prisma';
 import { hashPassword, comparePassword } from '../utils/password';
 import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from '../utils/jwt';
 import { ConflictError, UnauthorizedError, BadRequestError } from '../utils/errors';
-import { generateShareCode } from '../utils/calc';
-import { StockRole, AuditAction } from '@prisma/client';
 import { AuditAction } from '@prisma/client';
 
 export class AuthService {
@@ -18,15 +16,6 @@ export class AuthService {
 
     const passwordHash = await hashPassword(data.password);
 
-    // Cria o usuário e, imediatamente, o seu primeiro estoque principal como DONO
-    const result = await prisma.$transaction(async (tx) => {
-      const user = await tx.user.create({
-        data: {
-          name: data.name,
-          email: data.email,
-          password_hash: passwordHash,
-        },
-      });
     // Cria apenas a conta do usuário (sem criar estoque automático inicial)
     const user = await prisma.user.create({
       data: {
@@ -36,47 +25,6 @@ export class AuthService {
       },
     });
 
-      const defaultStock = await tx.stock.create({
-        data: {
-          name: 'Estoque Principal',
-          description: 'Estoque padrão inicial',
-          share_code: generateShareCode(),
-          share_code_expires_at: new Date(Date.now() + 15 * 60 * 1000),
-          created_by_id: user.id,
-          allow_negative_stock: false,
-        },
-      });
-
-      // Vincula o criador como OWNER
-      await tx.stockMember.create({
-        data: {
-          stock_id: defaultStock.id,
-          user_id: user.id,
-          role: StockRole.OWNER,
-        },
-      });
-
-      // Cria algumas categorias padrão
-      await tx.category.createMany({
-        data: [
-          { stock_id: defaultStock.id, name: 'Geral', color: '#DC2626' },
-          { stock_id: defaultStock.id, name: 'Matéria-Prima', color: '#3B82F6' },
-          { stock_id: defaultStock.id, name: 'Produtos Acabados', color: '#10B981' },
-        ],
-      });
-
-      await tx.auditLog.create({
-        data: {
-          user_id: user.id,
-          stock_id: defaultStock.id,
-          action: AuditAction.USER_REGISTER,
-          entity: 'User',
-          entity_id: user.id,
-          details: { message: 'Conta criada e estoque inicial gerado' },
-        },
-      });
-
-      return { user, defaultStock };
     await prisma.auditLog.create({
       data: {
         user_id: user.id,
@@ -88,10 +36,6 @@ export class AuthService {
     });
 
     const accessToken = generateAccessToken({
-      id: result.user.id,
-      email: result.user.email,
-      name: result.user.name,
-      tokenVersion: result.user.token_version,
       id: user.id,
       email: user.email,
       name: user.name,
@@ -99,10 +43,6 @@ export class AuthService {
     });
 
     const refreshToken = generateRefreshToken({
-      id: result.user.id,
-      email: result.user.email,
-      name: result.user.name,
-      tokenVersion: result.user.token_version,
       id: user.id,
       email: user.email,
       name: user.name,
@@ -111,14 +51,10 @@ export class AuthService {
 
     return {
       user: {
-        id: result.user.id,
-        name: result.user.name,
-        email: result.user.email,
         id: user.id,
         name: user.name,
         email: user.email,
       },
-      defaultStockId: result.defaultStock.id,
       defaultStockId: null,
       stocks: [],
       accessToken,
@@ -133,7 +69,6 @@ export class AuthService {
         stock_memberships: {
           include: {
             stock: {
-              select: { id: true, name: true, share_code: true },
               select: {
                 id: true,
                 name: true,
@@ -297,4 +232,3 @@ export class AuthService {
 }
 
 export const authService = new AuthService();
-
