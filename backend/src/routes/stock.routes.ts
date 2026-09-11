@@ -9,6 +9,7 @@ import itemRoutes from './item.routes';
 import movementRoutes from './movement.routes';
 import memberRoutes from './member.routes';
 import auditRoutes from './audit.routes';
+import categoryRoutes from './category.routes';
 
 const router = Router();
 
@@ -36,6 +37,7 @@ router.get('/:stockId/stats', (req, res) => stockController.getStockStats(req, r
 
 // Montagem das sub-rotas
 router.use('/:stockId/items', itemRoutes);
+router.use('/:stockId/categories', categoryRoutes);
 router.use('/:stockId/movements', movementRoutes);
 router.use('/:stockId/members', memberRoutes);
 router.use('/:stockId/audit', auditRoutes);

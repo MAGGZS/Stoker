@@ -28,7 +28,6 @@ import {
   ArrowRight,
   Warehouse,
   LogOut,
-  Truck,
 } from 'lucide-react';
 
 export default function EstoquesPage() {
