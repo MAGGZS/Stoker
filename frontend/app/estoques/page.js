@@ -1,7 +1,6 @@
 'use client';
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import { AppShell } from '../components/AppShell';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { Badge } from '../components/ui/Badge';
@@ -25,11 +24,13 @@ import {
   QrCode,
   ArrowRight,
   Warehouse,
+  LogOut,
+  Truck,
 } from 'lucide-react';
 
 export default function EstoquesPage() {
   const router = useRouter();
-  const { user } = useAuthStore();
+  const { user, logout, isLoading: authLoading } = useAuthStore();
   const {
     activeStock,
     activeStockId,
@@ -172,9 +173,80 @@ export default function EstoquesPage() {
     }
   };
 
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-[#0C0D11] flex items-center justify-center">
+        <span className="w-8 h-8 border-2 border-rose-500 border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  if (!user) {
+    if (typeof window !== 'undefined') router.replace('/login');
+    return null;
+  }
+
   return (
-    <AppShell onRefresh={refreshAll}>
-      <div className="space-y-6 max-w-6xl mx-auto">
+    <div className="min-h-screen bg-[#0C0D11] text-zinc-100 flex flex-col">
+      {/* Top Navigation Bar do Hub Standalone (SEM sidebar) */}
+      <header className="sticky top-0 z-30 bg-[#11131A]/95 backdrop-blur-md border-b border-[#232838] px-4 sm:px-8 py-3.5">
+        <div className="max-w-6xl mx-auto flex items-center justify-between gap-4">
+          {/* Brand Logo */}
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-[#14161F] border border-[#232838] text-rose-500 flex items-center justify-center shadow-lg shadow-black/40 shrink-0">
+              <Boxes size={22} strokeWidth={2.2} />
+            </div>
+            <div>
+              <span className="text-lg font-bold tracking-tight text-zinc-100 flex items-center gap-1">
+                Stoker
+                <span className="w-1.5 h-1.5 rounded-full bg-rose-500 inline-block" />
+              </span>
+              <p className="text-[11px] font-medium text-zinc-400">
+                Gestão e controle de estoques
+              </p>
+            </div>
+          </div>
+
+          {/* User actions */}
+          <div className="flex items-center gap-3">
+            {user?.isAdmin && (
+              <button
+                type="button"
+                onClick={() => router.push('/admin/logistica')}
+                className="hidden sm:inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/30 text-amber-300 text-xs font-semibold cursor-pointer transition-colors"
+              >
+                <Truck size={15} />
+                <span>Painel de Logística</span>
+              </button>
+            )}
+
+            <div className="hidden md:flex flex-col text-right">
+              <span className="text-xs font-semibold text-zinc-100 flex items-center justify-end gap-1.5">
+                {user?.name || 'Operador'}
+                {user?.isAdmin && (
+                  <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-400 font-bold border border-amber-500/30">
+                    ADM
+                  </span>
+                )}
+              </span>
+              <span className="text-[11px] text-zinc-400">{user?.email}</span>
+            </div>
+
+            <button
+              type="button"
+              onClick={logout}
+              title="Sair da conta"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#14161F] hover:bg-rose-500/15 border border-[#232838] hover:border-rose-500/30 text-zinc-400 hover:text-rose-300 text-xs font-medium transition-colors cursor-pointer"
+            >
+              <LogOut size={15} />
+              <span className="hidden sm:inline">Sair</span>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      {/* Conteúdo Principal do Hub de Estoques */}
+      <main className="flex-1 max-w-6xl w-full mx-auto p-4 sm:p-6 lg:p-8 space-y-6">
         {/* Top Header Hub */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-[rgba(255,255,255,0.06)]">
           <div>
@@ -185,7 +257,7 @@ export default function EstoquesPage() {
               Seus estoques
             </h1>
             <p className="text-xs sm:text-sm text-[rgba(244,244,245,0.55)] mt-0.5">
-              Escolha um estoque para operar ou crie um novo para sua unidade.
+              Escolha um estoque para operar, conferir itens ou registrar movimentações.
             </p>
           </div>
 
@@ -297,7 +369,7 @@ export default function EstoquesPage() {
           </div>
         )}
 
-        {/* Grid de Cards de Estoque */}
+        {/* Grid de Cards Sólidos de Estoque */}
         {filteredStocks.length > 0 && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {filteredStocks.map((stock) => {
@@ -309,20 +381,20 @@ export default function EstoquesPage() {
                   key={stock.id}
                   className={`flex flex-col justify-between p-5 relative overflow-hidden transition-[border-color,background-color,transform] ${
                     isSelected
-                      ? 'border-[#E11D48]/40 bg-[#161924]'
-                      : 'hover:border-[rgba(255,255,255,0.14)]'
+                      ? 'border-[#E11D48]/40 bg-[#161924] shadow-lg shadow-rose-950/20'
+                      : 'hover:border-[rgba(255,255,255,0.16)] bg-[#14161F]'
                   }`}
                 >
                   <div>
                     {/* Top Row: Nome e Badges */}
                     <div className="flex items-start justify-between gap-2 mb-2">
                       <div className="min-w-0 flex-1">
-                        <div className="flex items-center gap-2 mb-1">
+                        <div className="flex items-center gap-2 mb-1.5">
                           <Badge variant={isStockOwner ? 'accent' : 'default'} size="sm">
                             {roleLabel(stock.role)}
                           </Badge>
                           {isSelected && (
-                            <span className="text-[11px] font-medium text-[#FB7185] bg-[#E11D48]/15 px-2 py-0.5 rounded-full">
+                            <span className="text-[11px] font-medium text-[#FB7185] bg-[#E11D48]/15 px-2 py-0.5 rounded-full border border-rose-500/20">
                               Ativo
                             </span>
                           )}
@@ -401,12 +473,12 @@ export default function EstoquesPage() {
                       )}
 
                       <Button
-                        variant={isSelected ? 'primary' : 'secondary'}
+                        variant="primary"
                         size="sm"
                         onClick={() => handleSelectAndOpen(stock.id)}
                         icon={<ArrowRight size={13} />}
                       >
-                        {isSelected ? 'Abrir' : 'Acessar'}
+                        Acessar estoque
                       </Button>
                     </div>
                   </div>
@@ -417,8 +489,8 @@ export default function EstoquesPage() {
         )}
 
         {/* Seção de Gestão de Membros do Estoque Ativo */}
-        {activeStock && (
-          <div className="pt-6 border-t border-[rgba(255,255,255,0.08)]">
+        {activeStock && showMembersSection && (
+          <div className="pt-6 border-t border-[rgba(255,255,255,0.08)] anim-pop-in">
             <div className="flex items-center justify-between mb-4">
               <div>
                 <h2 className="text-base font-bold text-[#F4F4F5] flex items-center gap-2">
@@ -527,7 +599,7 @@ export default function EstoquesPage() {
             </Card>
           </div>
         )}
-      </div>
+      </main>
 
       {/* Modais de Estoque */}
       <NovoEstoqueModal
@@ -550,6 +622,6 @@ export default function EstoquesPage() {
         isOpen={inviteModalOpen}
         onClose={() => setInviteModalOpen(false)}
       />
-    </AppShell>
+    </div>
   );
 }

@@ -14,6 +14,7 @@ import {
   Warehouse,
   Truck,
   ShieldCheck,
+  ArrowLeft,
 } from 'lucide-react';
 
 export function Sidebar({ onOpenCreateStock, onOpenJoinStock }) {
@@ -46,6 +47,28 @@ export function Sidebar({ onOpenCreateStock, onOpenJoinStock }) {
           </p>
         </div>
       </div>
+
+      {/* Botão de retorno para o Hub de Estoques */}
+      <Link
+        href="/estoques"
+        className="flex items-center justify-between px-3 py-2.5 mb-3 rounded-xl bg-[#14161F] hover:bg-[#1A1E29] border border-[#232838] hover:border-[#384158] text-zinc-300 hover:text-white transition-all group cursor-pointer shadow-sm active:scale-[0.98]"
+        title="Voltar para a seleção de estoques"
+      >
+        <div className="flex items-center gap-2.5 min-w-0">
+          <div className="w-7 h-7 rounded-lg bg-[#0C0D11] border border-[#232838] flex items-center justify-center text-zinc-400 group-hover:text-rose-400 shrink-0">
+            <ArrowLeft size={14} />
+          </div>
+          <div className="text-left min-w-0">
+            <span className="text-xs font-semibold block text-zinc-200 group-hover:text-white truncate">
+              Meus estoques
+            </span>
+            <span className="text-[10px] text-zinc-500 block truncate">
+              Ver todos os estoques
+            </span>
+          </div>
+        </div>
+        <Warehouse size={15} className="text-zinc-500 group-hover:text-zinc-300 shrink-0 ml-1" />
+      </Link>
 
       {/* Seletor de Estoque */}
       <div className="mb-4">

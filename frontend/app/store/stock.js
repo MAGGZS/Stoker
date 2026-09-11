@@ -20,6 +20,10 @@ export const useStockStore = create((set, get) => ({
       if (!activeId || !stocks.some((s) => s.id === activeId)) {
         activeId = stocks[0]?.id || null;
         setStoredActiveStockId(activeId);
+      // Valida se o estoque ativo salvo ainda existe na lista do usuário
+      if (activeId && !stocks.some((s) => s.id === activeId)) {
+        activeId = null;
+        setStoredActiveStockId(null);
       }
 
       const active = stocks.find((s) => s.id === activeId) || null;
